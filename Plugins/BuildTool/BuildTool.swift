@@ -31,10 +31,6 @@ extension BuildTool: XcodeBuildToolPlugin {
 //    }
     
     func createBuildCommands(context: XcodePluginContext, target: XcodeTarget) throws -> [Command] {
-//        Diagnostics.error(try context.tool(named: "cp").path.string)
-        
-        var arguments = [CustomStringConvertible]()
-                
         var commands = [Command]()
         
         for inputFile in target.inputFiles {
@@ -42,30 +38,24 @@ extension BuildTool: XcodeBuildToolPlugin {
                 continue
             }
             
-            let outputFile = context.pluginWorkDirectory.appending(subpath: inputFile.path.stem.appending(".swift"))
-//            let outputFile2 = context.pluginWorkDirectory.appending(subpath: inputFile.path.lastComponent)
-
-//            Diagnostics.warning(inputFile.path.string)
-//            Diagnostics.warning(outputFile.string)
-//            Diagnostics.warning(outputFile2.string)
-
+            let momFile = context.pluginWorkDirectory.appending(subpath: inputFile.path.stem.appending(".momd"))
             
-            arguments.append("--input")
-            arguments.append(inputFile.path.string)
-            arguments.append("--output")
-            arguments.append(outputFile.string)
-            arguments.append("--temp")
-            arguments.append(context.pluginWorkDirectory.string)
-            arguments.append("--momc")
-            arguments.append(try context.tool(named: "momc").path.string)
+            let process = try Process.run(URL(fileURLWithPath: try context.tool(named: "momc").path.string), arguments: ["--no-warnings", inputFile.path.string, momFile.string])
+            process.waitUntilExit()
+                    
+            guard process.terminationReason == .exit && process.terminationStatus == 0 else {
+                fatalError()
+            }
             
-//            Diagnostics.warning(try context.tool(named: "cp").path.string + " " + ["-pr", inputFile.path.string, outputFile2.string].joined(separator: " "))
+            Diagnostics.warning(context.pluginWorkDirectory.string)
+            
+            let swiftFile = context.pluginWorkDirectory.appending(subpath: inputFile.path.stem.appending(".swift"))
+            
             commands.append(.buildCommand(displayName: "Generate model objects",
                                           executable: try context.tool(named: "Generator").path,
-                                          arguments: arguments,
-                                         inputFiles: [inputFile.path],
-                                         outputFiles: [outputFile]))
-
+                                          arguments: ["--input", momFile.string, "--output", swiftFile.string],
+                                         inputFiles: [momFile],
+                                         outputFiles: [swiftFile]))
         }
         
         return commands

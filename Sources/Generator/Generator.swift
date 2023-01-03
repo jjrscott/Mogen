@@ -13,21 +13,10 @@ import ArgumentParser
 struct Generator: ParsableCommand {
     @Option var input: String
     @Option var output: String
-    @Option var temp: String
-    @Option var momc: String
 
     mutating func run() throws {
-        
-        let momPath = temp+"/Bob.momd"
-        
-        let process = try Process.run(URL(fileURLWithPath: momc), arguments: ["--no-warnings", input, momPath])
-        process.waitUntilExit()
-                
-        guard process.terminationReason == .exit && process.terminationStatus == 0 else {
-            fatalError()
-        }
-                
-        guard let managedObjectModel = NSManagedObjectModel(contentsOf: URL(fileURLWithPath: momPath)) else {
+                        
+        guard let managedObjectModel = NSManagedObjectModel(contentsOf: URL(fileURLWithPath: input)) else {
             fatalError()
         }
         
