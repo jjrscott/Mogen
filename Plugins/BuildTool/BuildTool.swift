@@ -46,9 +46,7 @@ extension BuildTool: XcodeBuildToolPlugin {
             guard process.terminationReason == .exit && process.terminationStatus == 0 else {
                 fatalError()
             }
-            
-            Diagnostics.warning(context.pluginWorkDirectory.string)
-            
+                        
             let swiftFile = context.pluginWorkDirectory.appending(subpath: inputFile.path.stem.appending(".swift"))
             
             commands.append(.buildCommand(displayName: "Generate model objects",
