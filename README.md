@@ -21,10 +21,10 @@ Mogen will produce this:
 ```swift
 @objc(MOEvent) @objcMembers
 public class MOEvent: NSManagedObject {
-	@MGManaged("comment") var comment: String?
-	@MGManaged("timestamp") var timestamp: Date?
-	@MGManaged("timestampNudge") var timestampNudge: Int16?
-	@MGManaged("animals") private(set) var animals: MGMutableSet<MOAnimal>
+    @MGManaged("comment") var comment: String?
+    @MGManaged("timestamp") var timestamp: Date?
+    @MGManaged("timestampNudge") var timestampNudge: Int16?
+    @MGManaged("animals") private(set) var animals: MGMutableSet<MOAnimal>
 }
 ```
 
