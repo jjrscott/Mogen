@@ -16,22 +16,22 @@ public class MGManaged<Value: MGManagable>: NSObject {
         storage storageKeyPath: ReferenceWritableKeyPath<EnclosingType, MGManaged>
     ) -> Value {
         get {
-            let `self` = instance[keyPath:storageKeyPath]
-            instance.willAccessValue(forKey: self.name)
-            defer { instance.didAccessValue(forKey: self.name) }
-            return Value.decode(value: instance.primitiveValue(forKey: self.name))
+            let wrapper = instance[keyPath:storageKeyPath]
+            instance.willAccessValue(forKey: wrapper.name)
+            defer { instance.didAccessValue(forKey: wrapper.name) }
+            return Value.decode(value: instance.primitiveValue(forKey: wrapper.name))
         }
         set {
-            let `self` = instance[keyPath:storageKeyPath]
-            instance.willChangeValue(forKey: self.name)
-            instance.setPrimitiveValue(newValue.encode(), forKey: self.name)
-            instance.didChangeValue(forKey: self.name)
+            let wrapper = instance[keyPath:storageKeyPath]
+            instance.willChangeValue(forKey: wrapper.name)
+            instance.setPrimitiveValue(newValue.encode(), forKey: wrapper.name)
+            instance.didChangeValue(forKey: wrapper.name)
         }
     }
 
-//    @available(*, unavailable,
-//        message: "@MGManaged can only be applied to NSManagedObject classes"
-//    )
+    @available(*, unavailable,
+        message: "@MGManaged can only be applied to NSManagedObject classes"
+    )
     public var wrappedValue: Value {
         get { fatalError() }
         set { fatalError() }
@@ -39,6 +39,10 @@ public class MGManaged<Value: MGManagable>: NSObject {
 
     public init(_ name: String) {
         self.name = name
+    }
+    
+    public var projectedValue: MGManaged<Value> {
+        return self
     }
     
     var name: String

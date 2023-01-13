@@ -15,7 +15,6 @@ struct Generator: ParsableCommand {
     @Option var output: String
 
     mutating func run() throws {
-                        
         guard let managedObjectModel = NSManagedObjectModel(contentsOf: URL(fileURLWithPath: input)) else {
             fatalError()
         }
@@ -38,27 +37,20 @@ public class \(name): \(entity.superentity?.managedObjectClassName ?? "NSManaged
 
 """
             for property in entity.properties {
-                if let xxx = entity.superentity?.properties.contains(property),
-                   xxx {
+                if entity.superentity?.properties.contains(property) == true {
                     continue
                 }
                 swiftCode += "\t@MGManaged(\"\(property.name)\") \(property.swiftType)\n"
             }
-            
-            
             swiftCode += """
 }
 """
             if entity.superentity == nil {
                 swiftCode += """
 
-extension \(name): Identifiable {
-    
-}
+extension \(name): Identifiable { }
 """
             }
-            
-            
         }
         
         try swiftCode.write(toFile: output, atomically: true, encoding: .utf8)
