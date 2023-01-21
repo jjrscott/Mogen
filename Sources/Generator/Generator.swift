@@ -74,7 +74,7 @@ extension NSAttributeType {
         case .integer16AttributeType: return "Int16"
         case .integer32AttributeType: return "Int32"
         case .integer64AttributeType: return "Int64"
-        case .decimalAttributeType: return ""
+        case .decimalAttributeType: return "Decimal"
         case .doubleAttributeType: return "Double"
         case .floatAttributeType: return "Float"
         case .stringAttributeType: return "String"

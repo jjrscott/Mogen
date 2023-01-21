@@ -10,6 +10,9 @@ import CoreData
 public protocol MGManagable {
     static func decode(value: Any?) -> Self
     func encode() -> Any?
+
+    init(from object: NSManagedObject, forKey key: String)
+    func encode(to object: NSManagedObject, forKey key: String)
 }
 
 extension MGManagable {
@@ -24,6 +27,18 @@ extension MGManagable {
     public func encode() -> Any? {
         self
     }
+    
+    public init(from object: NSManagedObject, forKey key: String) {
+        object.willAccessValue(forKey: key)
+        defer { object.didAccessValue(forKey: key) }
+        self = Self.decode(value: object.primitiveValue(forKey: key))
+    }
+    
+    public func encode(to object: NSManagedObject, forKey key: String) {
+        object.willChangeValue(forKey: key)
+        object.setPrimitiveValue(encode(), forKey: key)
+        object.didChangeValue(forKey: key)
+    }
 }
 
 extension String: MGManagable {}
@@ -31,6 +46,22 @@ extension Date: MGManagable {}
 extension Data: MGManagable {}
 extension NSManagedObject: MGManagable {}
 extension NSFetchRequest: MGManagable {}
+extension UUID: MGManagable {}
+extension URL: MGManagable {}
+
+extension Int16: MGManagable {
+    public static func decode(value: Any?) -> Int16 {
+        if let value = value as? NSNumber {
+            return value.int16Value
+        } else {
+            fatalError()
+        }
+    }
+    
+    public func encode() -> Any? {
+        NSNumber(value: self)
+    }
+}
 
 extension Int32: MGManagable {
     public static func decode(value: Any?) -> Int32 {
@@ -46,10 +77,10 @@ extension Int32: MGManagable {
     }
 }
 
-extension Bool: MGManagable {
-    public static func decode(value: Any?) -> Bool {
+extension Int64: MGManagable {
+    public static func decode(value: Any?) -> Int64 {
         if let value = value as? NSNumber {
-            return value.boolValue
+            return value.int64Value
         } else {
             fatalError()
         }
@@ -60,10 +91,53 @@ extension Bool: MGManagable {
     }
 }
 
-extension Int16: MGManagable {
-    public static func decode(value: Any?) -> Int16 {
+extension Double: MGManagable {
+    public static func decode(value: Any?) -> Double {
         if let value = value as? NSNumber {
-            return value.int16Value
+            return value.doubleValue
+        } else {
+            fatalError()
+        }
+    }
+    
+    public func encode() -> Any? {
+        NSNumber(value: self)
+    }
+}
+
+extension Float: MGManagable {
+    public static func decode(value: Any?) -> Float {
+        if let value = value as? NSNumber {
+            return value.floatValue
+        } else {
+            fatalError()
+        }
+    }
+    
+    public func encode() -> Any? {
+        NSNumber(value: self)
+    }
+}
+
+extension Decimal: MGManagable {
+    public static func decode(value: Any?) -> Decimal {
+        if let value = value as? NSDecimalNumber {
+            return value.decimalValue
+        } else {
+            fatalError()
+        }
+    }
+    
+    public func encode() -> Any? {
+        NSDecimalNumber(decimal: self)
+    }
+}
+
+
+extension Bool: MGManagable {
+    public static func decode(value: Any?) -> Bool {
+        if let value = value as? NSNumber {
+            return value.boolValue
         } else {
             fatalError()
         }
@@ -87,18 +161,3 @@ extension Optional: MGManagable where Wrapped: MGManagable {
         self?.encode()
     }
 }
-
-
-extension MGMutableSet: MGManagable where Element: NSManagedObject {
-    public static func decode(value: Any?) -> Self {
-        guard let value = value as? NSMutableSet else {
-            fatalError()
-        }
-        return Self(original: value)
-    }
-
-    public func encode() -> Any? {
-        fatalError()
-    }
-}
-
